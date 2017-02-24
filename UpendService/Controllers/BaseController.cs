@@ -11,7 +11,8 @@ using UpendService.Models;
 
 namespace UpendService.Controllers
 {
-	[Authorize]
+	[Route("api/[controller]")]
+	//[Authorize]
 	public abstract class BaseController<T> : Controller
 		where T : Data
 	{
@@ -30,6 +31,7 @@ namespace UpendService.Controllers
 			}
 		}
 
+		[NonAction]
 		protected string GetCurrentUniqueIdentifier()
 		{
 			var claimsIdentity = (ClaimsPrincipal)User;
@@ -39,6 +41,7 @@ namespace UpendService.Controllers
 			return nameIdentifier + "_" + provider;
 		}
 
+		[HttpGet]
 		public virtual IEnumerable<T> Get()
 		{
 			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
@@ -46,6 +49,7 @@ namespace UpendService.Controllers
 			return Table.ExecuteQuery(query).ToList().Select(x => x.Data);
 		}
 
+		[NonAction]
 		private IEnumerable<DataEntity<T>> GetEntities(Guid id)
 		{
 			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, id.ToString());
@@ -54,6 +58,7 @@ namespace UpendService.Controllers
 			return Table.ExecuteQuery(query).ToList();
 		}
 
+		[NonAction]
 		protected IEnumerable<DataEntity<T>> GetDataForRowKey(Guid id)
 		{
 			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
@@ -64,6 +69,7 @@ namespace UpendService.Controllers
 			return Table.ExecuteQuery(query).ToList();
 		}
 
+		[HttpGet("{id}")]
 		public IEnumerable<T> Get(Guid id)
 		{
 			return GetEntities(id).Select(x => x.Data);
@@ -76,6 +82,7 @@ namespace UpendService.Controllers
 		//	return DataToReturnUponCreation(data);
 		//}
 
+		[HttpPost]
 		public virtual Guid Post([FromBody]T value)
 		{
 			if (!IsValid(value))
@@ -84,7 +91,7 @@ namespace UpendService.Controllers
 			return DataToReturnUponCreation(value);
 		}
 
-		[HttpPut]
+		[HttpPut("{id}")]
 		public void Put(Guid id, [FromBody] T value)
 		{
 			T data = value;
@@ -93,7 +100,7 @@ namespace UpendService.Controllers
 			Table.Execute(TableOperation.InsertOrReplace(Entity(data)));
 		}
 
-		[HttpDelete]
+		[HttpDelete("{id}")]
 		public virtual void Delete(Guid id)
 		{
 			var dataEntities = DataToDelete(id);
