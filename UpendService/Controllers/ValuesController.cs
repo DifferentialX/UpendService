@@ -3,24 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace UpendService.Controllers
 {
 	[Route("api/[controller]")]
 	public class ValuesController : Controller
 	{
+		protected readonly string Connection;
+		public ValuesController(IConfigurationRoot config)
+		{
+			Connection = config.GetConnectionString("UpendStorageConnection");
+		}
+
 		// GET api/values
 		[HttpGet]
 		public IEnumerable<string> Get()
 		{
-			return new string[] { "value1", "value2" };
+			return new string[] { "value1", "value2", Connection };
 		}
 
 		// GET api/values/5
 		[HttpGet("{id}")]
-		public string Get(int id)
+		public int Get(int id)
 		{
-			return "value";
+			return id;
 		}
 
 		// POST api/values
