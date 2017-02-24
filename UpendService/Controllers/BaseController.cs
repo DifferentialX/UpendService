@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
@@ -16,6 +17,13 @@ namespace UpendService.Controllers
 	public abstract class BaseController<T> : Controller
 		where T : Data
 	{
+		protected readonly string Connection;
+		public BaseController() { }
+		public BaseController(IConfigurationRoot config)
+		{
+			Connection = config.GetConnectionString("UpendStorageConnection");
+		}
+
 		private static CloudTable table = default(CloudTable);
 		protected static CloudTable Table
 		{
@@ -23,7 +31,7 @@ namespace UpendService.Controllers
 			{
 				if (table == default(CloudTable))
 				{
-					CloudStorageAccount account = CloudStorageAccount.Parse("Connection String"); //TODO JAF 20170221: AAAAAAAACK will fail
+					CloudStorageAccount account = CloudStorageAccount.Parse("UseDevelopmentStorage=true"); //TODO JAF 20170221: AAAAAAAACK will fail
 					table = account.CreateCloudTableClient().GetTableReference(typeof(T).Name + "s");
 					table.CreateIfNotExistsAsync();
 				}
