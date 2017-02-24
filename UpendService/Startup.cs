@@ -37,7 +37,7 @@ namespace UpendService
 		{
 			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
-
+			app.UseMiddleware<Middleware.AuthInjector>();
 			app.UseMvc();
 		}
 	}
