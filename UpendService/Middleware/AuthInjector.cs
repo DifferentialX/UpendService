@@ -23,7 +23,7 @@ namespace UpendService.Middleware
 
 		public async Task Invoke(HttpContext context)
 		{
-			if(env.IsDevelopment())
+			if(env.IsDevelopment() && context.Request.Path.Value.Contains("localhost"))
 			{
 				CreateDevelopmentUser(context);
 			}
