@@ -10,7 +10,7 @@ namespace UpendService.Controllers
 {
 	public class UserController : BaseController<User>
 	{
-		public UserController(ModelContext model) : base(model, model.Users) { }
+		public UserController(ModelContext model) : base(model) { }
 
 		public override IEnumerable<User> Get()
 		{

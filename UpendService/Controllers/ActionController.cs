@@ -8,7 +8,7 @@ namespace UpendService.Controllers
 {
 	public class ActionController : BaseController<Action>
 	{
-		public ActionController(ModelContext model) : base(model, model.Actions) { }
+		public ActionController(ModelContext model) : base(model) { }
 		public override string RowKey(Action a)
 		{
 			return a.Time.Ticks.ToString();

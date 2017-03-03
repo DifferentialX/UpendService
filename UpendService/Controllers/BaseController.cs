@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using UpendService.Models;
+using System.Reflection;
 
 
 namespace UpendService.Controllers
@@ -19,11 +20,11 @@ namespace UpendService.Controllers
 	{
 		protected readonly ModelContext Model;
 		protected readonly CloudTable Table;
-		public BaseController(ModelContext model, CloudTable table)
+		public BaseController(ModelContext model)
 		{
+			
 			Model = model;
-			Table = table;
-
+			Table = model.GetTable<T>();
 		}
 
 		[NonAction]

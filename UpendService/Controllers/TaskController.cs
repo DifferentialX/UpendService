@@ -13,7 +13,7 @@ namespace UpendService.Controllers
 {
 	public class TaskController : BaseController<Task>
 	{
-		public TaskController(ModelContext model) : base(model, model.Tasks) { }
+		public TaskController(ModelContext model) : base(model) { }
 
 		public override Guid Post([FromBody]Task value)
 		{
