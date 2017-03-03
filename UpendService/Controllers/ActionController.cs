@@ -1,11 +1,14 @@
 ﻿using System;
+using Microsoft.WindowsAzure.Storage.Table;
 using UpendService.Models;
 using Action = UpendService.Models.Action;
+using Microsoft.Extensions.Configuration;
 
 namespace UpendService.Controllers
 {
 	public class ActionController : BaseController<Action>
 	{
+		public ActionController(ModelContext model) : base(model, model.Actions) { }
 		public override string RowKey(Action a)
 		{
 			return a.Time.Ticks.ToString();

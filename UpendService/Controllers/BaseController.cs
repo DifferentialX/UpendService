@@ -17,26 +17,13 @@ namespace UpendService.Controllers
 	public abstract class BaseController<T> : Controller
 		where T : Data
 	{
-		protected readonly string Connection;
-		public BaseController() { }
-		public BaseController(IConfigurationRoot config)
+		protected readonly ModelContext Model;
+		protected readonly CloudTable Table;
+		public BaseController(ModelContext model, CloudTable table)
 		{
-			Connection = config.GetConnectionString("UpendStorageConnection");
-		}
+			Model = model;
+			Table = table;
 
-		private static CloudTable table = default(CloudTable);
-		protected static CloudTable Table
-		{
-			get
-			{
-				if (table == default(CloudTable))
-				{
-					CloudStorageAccount account = CloudStorageAccount.Parse("UseDevelopmentStorage=true"); //TODO JAF 20170221: AAAAAAAACK will fail
-					table = account.CreateCloudTableClient().GetTableReference(typeof(T).Name + "s");
-					table.CreateIfNotExistsAsync();
-				}
-				return table;
-			}
 		}
 
 		[NonAction]

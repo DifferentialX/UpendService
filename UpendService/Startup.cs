@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +24,7 @@ namespace UpendService
 		public void ConfigureServices(IServiceCollection services)
 		{
 			// Add framework services.
+			services.AddSingleton<ModelContext>();
 			services.AddMvc();
 			services.AddSingleton(Configuration);
 		}
@@ -40,7 +37,7 @@ namespace UpendService
 				app.UseDeveloperExceptionPage();
 				app.UseStatusCodePages();
 			}
-            
+			
 			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
 			app.UseMiddleware<Middleware.AuthInjector>();

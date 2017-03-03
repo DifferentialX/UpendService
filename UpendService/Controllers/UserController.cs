@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace UpendService.Controllers
 {
 	public class UserController : BaseController<User>
 	{
+		public UserController(ModelContext model) : base(model, model.Users) { }
+
 		public override IEnumerable<User> Get()
 		{
 			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
@@ -28,8 +31,8 @@ namespace UpendService.Controllers
 		public override void Delete(Guid id)
 		{
 			base.Delete(id);
-			new TaskController().Delete(id);
-			new ActionController().Delete(id);
+			new TaskController(Model).Delete(id);
+			new ActionController(Model).Delete(id);
 		}
 
 		public override string PartitionKey(User data)

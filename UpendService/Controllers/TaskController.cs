@@ -13,6 +13,8 @@ namespace UpendService.Controllers
 {
 	public class TaskController : BaseController<Task>
 	{
+		public TaskController(ModelContext model) : base(model, model.Tasks) { }
+
 		public override Guid Post([FromBody]Task value)
 		{
 			value.TaskGuid = Guid.NewGuid();
@@ -31,11 +33,11 @@ namespace UpendService.Controllers
 			// Delete all actions whose task guid is this one
 			var filter = TableQuery.GenerateFilterCondition("TaskGuid", QueryComparisons.Equal, id.ToString());
 			var query = new TableQuery<ActionDataEntity>().Where(filter);
-			var actions = ActionController.Table.ExecuteQuery(query).ToList();
+			var actions = Model.Actions.ExecuteQuery(query).ToList();
 
 			foreach (var action in actions)
 			{
-				ActionController.Table.Execute(TableOperation.Delete(action));
+				Model.Actions.Execute(TableOperation.Delete(action));
 			}
 
 
