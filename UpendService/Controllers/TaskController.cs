@@ -31,7 +31,7 @@ namespace UpendService.Controllers
 			base.Delete(id);
 
 			// Delete all actions whose task guid is this one
-			var filter = TableQuery.GenerateFilterCondition("TaskGuid", QueryComparisons.Equal, id.ToString());
+			var filter = TableQuery.GenerateFilterCondition("TaskGuid", QueryComparisons.Equal, id.ToString()); //TaskGuid eq [id.tostring()]
 			var query = new TableQuery<ActionDataEntity>().Where(filter);
 			var actions = Model.Actions.ExecuteQuery(query).ToList();
 

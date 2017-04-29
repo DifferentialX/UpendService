@@ -35,11 +35,6 @@ namespace UpendService.Controllers
 			new ActionController(Model).Delete(id);
 		}
 
-		public override string PartitionKey(User data)
-		{
-			return GetCurrentUniqueIdentifier();
-		}
-
 		public override string RowKey(User u)
 		{
 			return u.UserGuid.ToString();

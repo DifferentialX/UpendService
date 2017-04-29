@@ -9,7 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using UpendService.Models;
 using System.Reflection;
-
+using UpendService.Services;
 
 namespace UpendService.Controllers
 {
@@ -19,12 +19,14 @@ namespace UpendService.Controllers
 		where T : Data
 	{
 		protected readonly ModelContext Model;
-		protected readonly CloudTable Table;
+		protected CloudTable Table { get; set; }
+		protected readonly ITable Table2;
 		public BaseController(ModelContext model)
 		{
 			
 			Model = model;
 			Table = model.GetTable<T>();
+			Table2 = model.GetTable2<T>();
 		}
 
 		[NonAction]
@@ -40,35 +42,25 @@ namespace UpendService.Controllers
 		[HttpGet]
 		public virtual IEnumerable<T> Get()
 		{
-			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
-			var query = new TableQuery<DataEntity<T>>().Where(filter);
-			return Table.ExecuteQuery(query).ToList().Select(x => x.Data);
+			return Table2.Find<T>(GetCurrentUniqueIdentifier());
 		}
 
 		[NonAction]
 		private IEnumerable<DataEntity<T>> GetEntities(Guid id)
 		{
-			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, id.ToString());
-			var query = new TableQuery<DataEntity<T>>().Where(filter);
-
-			return Table.ExecuteQuery(query).ToList();
+			return Table2.FindEntities<T>(id.ToString());
 		}
 
 		[NonAction]
 		protected IEnumerable<DataEntity<T>> GetDataForRowKey(Guid id)
 		{
-			var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
-			var filter2 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, id.ToString());
-			var combined = TableQuery.CombineFilters(filter, TableOperators.And, filter2);
-			var query = new TableQuery<DataEntity<T>>().Where(combined);
-
-			return Table.ExecuteQuery(query).ToList();
+			return Table2.FindEntities<T>(GetCurrentUniqueIdentifier(), id.ToString());
 		}
 
 		[HttpGet("{id}")]
 		public IEnumerable<T> Get(Guid id)
 		{
-			return GetEntities(id).Select(x => x.Data);
+			return Table2.Find<T>(GetCurrentUniqueIdentifier(), id.ToString());
 		}
 
 		//public virtual Guid Post([FromBody]string value)
@@ -83,7 +75,6 @@ namespace UpendService.Controllers
 		{
 			if (!IsValid(value))
 				return Guid.Empty;
-			Table.Execute(TableOperation.Insert(Entity(value)));
 			return DataToReturnUponCreation(value);
 		}
 
@@ -99,6 +90,7 @@ namespace UpendService.Controllers
 		[HttpDelete("{id}")]
 		public virtual void Delete(Guid id)
 		{
+			Table2.Delete<T>(GetCurrentUniqueIdentifier(), id.ToString());
 			var dataEntities = DataToDelete(id);
 			foreach (var dataEntity in dataEntities)
 			{
