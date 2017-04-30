@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
+﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,13 @@ namespace UpendService.Services
 	{
 		private readonly CloudTable _table;
 
-		public AzureStorageTable(CloudTable table)
+		public AzureStorageTable(Type type, string connection)
 		{
-			_table = table;
+			CloudStorageAccount account = CloudStorageAccount.Parse(connection);
+			_table = account.CreateCloudTableClient().GetTableReference(type.Name + "s");
+			_table.CreateIfNotExistsAsync().Wait();
 		}
+
 		#region Table Storage Specific Methods
 		private IEnumerable<DataEntity<T>> FindEntities<T>(Where query) where T : Data<T>
 		{
