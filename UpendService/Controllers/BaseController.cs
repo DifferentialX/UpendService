@@ -19,7 +19,7 @@ namespace UpendService.Controllers
 		{
 			
 			_model = model;
-			_table = model.GetTable2<T>();
+			_table = model.GetTable<T>();
 		}
 		#region Actions
 
