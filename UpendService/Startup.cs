@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using UpendService.Services.TableFactory;
 
 namespace UpendService
 {
@@ -27,6 +28,7 @@ namespace UpendService
 			services.AddSingleton<ModelContext>();
 			services.AddMvc();
 			services.AddSingleton(Configuration);
+			services.AddSingleton<ITableFactory, AzureStorageTableFactory>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
