@@ -15,53 +15,30 @@ namespace UpendService.Controllers
 	{
 		public TaskController(ModelContext model) : base(model) { }
 
-		public override Guid Post([FromBody]Task value)
+		public override Guid? Post([FromBody]Task value)
 		{
 			value.TaskGuid = Guid.NewGuid();
 			return base.Post(value);
-		}
-
-		public override string RowKey(Task data)
-		{
-			return data.TaskGuid.ToString();
 		}
 
 		public override void Delete(Guid id)
 		{
 			base.Delete(id);
 
-			// Delete all actions whose task guid is this one
-			var filter = TableQuery.GenerateFilterCondition("TaskGuid", QueryComparisons.Equal, id.ToString()); //TaskGuid eq [id.tostring()]
-			var query = new TableQuery<ActionDataEntity>().Where(filter);
-			var actions = Model.Actions.ExecuteQuery(query).ToList();
-
-			foreach (var action in actions)
-			{
-				Model.Actions.Execute(TableOperation.Delete(action));
-			}
-
-
 			//// Delete all actions whose task guid is this one
-			//var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, GetCurrentUniqueIdentifier());
+			//var filter = TableQuery.GenerateFilterCondition("TaskGuid", QueryComparisons.Equal, id.ToString()); //TaskGuid eq [id.tostring()]
 			//var query = new TableQuery<ActionDataEntity>().Where(filter);
-			//var actions = Table.ExecuteQuery(query).ToList().Where(action => action.TaskGuid == id.ToString());
+			//var actions = Model.Actions.ExecuteQuery(query).ToList();
 
 			//foreach (var action in actions)
 			//{
-			//	ActionController.Table.Execute(TableOperation.Delete(action));
+			//	Model.Actions.Execute(TableOperation.Delete(action));
 			//}
-
-			//ActionController.Table.DeleteAsync
 		}
 
-		public override Guid DataToReturnUponCreation(Task data)
+		public override Guid? CreateResponse(Task data)
 		{
 			return data.TaskGuid;
-		}
-
-		public override IEnumerable<Entity> DataToDelete(Guid id)
-		{
-			return GetDataForRowKey(id);
 		}
 
 		internal override bool IsValid(Task data)

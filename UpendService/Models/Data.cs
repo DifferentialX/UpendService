@@ -4,12 +4,12 @@ using System;
 
 namespace UpendService.Models
 {
-	public class Data
+	public abstract class Data<T> where T : Data<T>
 	{
-		public Guid UserGuid { get; set; }
+		public abstract DataEntity<T> Entity(string partition);
 	}
 
-	public class DataEntity<T> : TableEntity where T : Data
+	public class DataEntity<T> : TableEntity where T : Data<T>
 	{
 		public string DataString { get; set; }
 		public DataEntity()
@@ -18,10 +18,7 @@ namespace UpendService.Models
 		}
 		public DataEntity(T data, string partitionKey, string rowKey = "")
 		{
-			if (partitionKey == null)
-				partitionKey = data.UserGuid.ToString();
-
-			PartitionKey = partitionKey;
+			PartitionKey = partitionKey ?? throw new ArgumentNullException(nameof(partitionKey), nameof(partitionKey) + " must be the user's SID");
 			RowKey = rowKey;
 			var jSet = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore };
 			DataString = JsonConvert.SerializeObject(data, jSet);

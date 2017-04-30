@@ -18,9 +18,9 @@ namespace UpendService
 		public CloudTable Tasks { get; set; }
 		public CloudTable Users { get; set; }
 
-		private Dictionary<System.Type, CloudTable> tables;
-		private Dictionary<System.Type, ITable> tables2;
-		private ITable GetAStoredTable<T>() where T : Data
+		private IDictionary<System.Type, CloudTable> tables;
+		private IDictionary<System.Type, ITable> tables2;
+		private ITable GetAStoredTable<T>() where T : Data<T>
 		{
 			if (!tables2.ContainsKey(typeof(T)))
 				return null;
@@ -35,6 +35,7 @@ namespace UpendService
 			CloudStorageAccount account = CloudStorageAccount.Parse(connection);
 
 			tables = new Dictionary<System.Type, CloudTable>();
+			tables2 = new Dictionary<System.Type, ITable>();
 
 			Actions = GetTable<Action>(account);
 			Tasks = GetTable<Task>(account);
@@ -50,7 +51,7 @@ namespace UpendService
 			return tables[typeof(T)];
 		}
 
-		public ITable GetTable2<T>() where T: Data
+		public ITable GetTable2<T>() where T: Data<T>
 		{
 			return GetAStoredTable<T>();
 		}

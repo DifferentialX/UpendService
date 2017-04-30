@@ -15,13 +15,8 @@ namespace UpendService.Services
 		{
 			_table = table;
 		}
-
-		public IEnumerable<DataEntity<T>> FindEntities<T>(string partitionKey, string rowKey = null) where T : Data
-		{
-			return FindEntities<T>(new WhereQuery(partitionKey, rowKey));
-		}
-
-		public IEnumerable<DataEntity<T>> FindEntities<T>(WhereQuery query) where T : Data
+		#region Table Storage Specific Methods
+		private IEnumerable<DataEntity<T>> FindEntities<T>(Where query) where T : Data<T>
 		{
 			string filter = null;
 			foreach (var que in query)
@@ -42,26 +37,23 @@ namespace UpendService.Services
 				filter = TableQuery.CombineFilters(filter, TableOperators.And, condition);
 			return filter;
 		}
+		#endregion
 
-		public IEnumerable<T> Find<T>(string partitionKey, string rowKey = null) where T : Data
-		{
-			return Find<T>(new WhereQuery(partitionKey, rowKey));
-		}
-
-		public IEnumerable<T> Find<T>(WhereQuery where) where T : Data
-		{
-			return FindEntities<T>(where).Select(d => d.Data);
-		}
+		#region ITable
+		public IEnumerable<T> Find<T>(Where where) where T : Data<T> =>
+			FindEntities<T>(where).Select(d => d.Data);
 		
-		private void Delete<T>(IEnumerable<DataEntity<T>> data) where T : Data =>
+		private void Delete<T>(IEnumerable<DataEntity<T>> data) where T : Data<T> =>
 			Parallel.ForEach(data, dataEntity => _table.Execute(TableOperation.Delete(dataEntity)));
 
-		public void Delete<T>(string partitionKey, string rowKey = null) where T : Data => 
-			Delete<T>(FindEntities<T>(new WhereQuery(partitionKey, rowKey)));
+		public void Delete<T>(Where where) where T : Data<T> => 
+			Delete<T>(FindEntities<T>(where));
 
-		public void Insert<T>(T data) where T : Data
-		{
-			_table.Execute(TableOperation.Insert(Entity(data)));
-		}
+		public void Insert<T>(T data, string partitionKey) where T : Data<T> =>
+			_table.Execute(TableOperation.Insert(data.Entity(partitionKey)));
+
+		public void Update<T>(T data, string partitionKey) where T : Data<T> =>
+			_table.Execute(TableOperation.InsertOrReplace(data.Entity(partitionKey)));
+#endregion
 	}
 }

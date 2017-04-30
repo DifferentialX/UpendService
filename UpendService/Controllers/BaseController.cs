@@ -1,14 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using UpendService.Models;
-using System.Reflection;
 using UpendService.Services;
 
 namespace UpendService.Controllers
@@ -16,116 +11,63 @@ namespace UpendService.Controllers
 	[Route("api/[controller]")]
 	//[Authorize]
 	public abstract class BaseController<T> : Controller
-		where T : Data
+		where T : Data<T>
 	{
-		protected readonly ModelContext Model;
-		protected CloudTable Table { get; set; }
-		protected readonly ITable Table2;
+		protected readonly ModelContext _model;
+		protected readonly ITable _table;
 		public BaseController(ModelContext model)
 		{
 			
-			Model = model;
-			Table = model.GetTable<T>();
-			Table2 = model.GetTable2<T>();
+			_model = model;
+			_table = model.GetTable2<T>();
 		}
-
-		[NonAction]
-		protected string GetCurrentUniqueIdentifier()
-		{
-			var claimsIdentity = (ClaimsPrincipal)User;
-
-			string provider = claimsIdentity.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider").Value;
-			string nameIdentifier = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-			return nameIdentifier + "_" + provider;
-		}
+		#region Actions
 
 		[HttpGet]
-		public virtual IEnumerable<T> Get()
-		{
-			return Table2.Find<T>(GetCurrentUniqueIdentifier());
-		}
-
-		[NonAction]
-		private IEnumerable<DataEntity<T>> GetEntities(Guid id)
-		{
-			return Table2.FindEntities<T>(id.ToString());
-		}
-
-		[NonAction]
-		protected IEnumerable<DataEntity<T>> GetDataForRowKey(Guid id)
-		{
-			return Table2.FindEntities<T>(GetCurrentUniqueIdentifier(), id.ToString());
-		}
+		public virtual IEnumerable<T> Get() =>
+			_table.Find<T>(Where.Query(Partition));
 
 		[HttpGet("{id}")]
-		public IEnumerable<T> Get(Guid id)
-		{
-			return Table2.Find<T>(GetCurrentUniqueIdentifier(), id.ToString());
-		}
-
-		//public virtual Guid Post([FromBody]string value)
-		//{
-		//          var data = JsonConvert.DeserializeObject<T>(value);
-		//	Table.Execute(TableOperation.Insert(Entity(data)));
-		//	return DataToReturnUponCreation(data);
-		//}
+		public IEnumerable<T> Get(Guid id) =>
+			_table.Find<T>(Where.Query(Partition, id.ToString()));
 
 		[HttpPost]
-		public virtual Guid Post([FromBody]T value)
+		public virtual Guid? Post([FromBody]T data)
 		{
-			if (!IsValid(value))
-				return Guid.Empty;
-			return DataToReturnUponCreation(value);
+			if (!IsValid(data)) return null;
+			_table.Insert(data, Partition);
+			return CreateResponse(data);
 		}
 
 		[HttpPut("{id}")]
-		public void Put(Guid id, [FromBody] T value)
+		public void Put(Guid id, [FromBody] T data)
 		{
-			T data = value;
-			if (!IsValid(data))
-				return;
-			Table.Execute(TableOperation.InsertOrReplace(Entity(data)));
+			if (!IsValid(data)) return;
+
+			_table.Update(data, Partition);
 		}
 
 		[HttpDelete("{id}")]
-		public virtual void Delete(Guid id)
+		public virtual void Delete(Guid id) =>
+			_table.Delete<T>(Where.Query(Partition, id.ToString()));
+		#endregion
+
+		protected string Partition
 		{
-			Table2.Delete<T>(GetCurrentUniqueIdentifier(), id.ToString());
-			var dataEntities = DataToDelete(id);
-			foreach (var dataEntity in dataEntities)
+			get
 			{
-				Table.Execute(TableOperation.Delete(dataEntity));
+				var claimsIdentity = User; //Asp.Net Core User, not a Model.User
+
+				string provider = claimsIdentity.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider").Value;
+				string nameIdentifier = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+				return nameIdentifier + "_" + provider;
 			}
 		}
+		
+		[NonAction]
+		public virtual Guid? CreateResponse(T data) { return null; }
 
 		[NonAction]
-		public virtual IEnumerable<DataEntity<T>> DataToDelete(Guid id)
-		{
-			return GetEntities(id);
-		}
-
-		[NonAction]
-		public abstract string RowKey(T data);
-
-		[NonAction]
-		public abstract Guid DataToReturnUponCreation(T data);
-
-		[NonAction]
-		public virtual string PartitionKey(T data)
-		{
-			return GetCurrentUniqueIdentifier();
-		}
-
-		[NonAction]
-		protected virtual DataEntity<T> Entity(T data)
-		{
-			return new DataEntity<T>(data, PartitionKey(data), RowKey(data));
-		}
-
-		[NonAction]
-		internal virtual bool IsValid(T data)
-		{
-			return true;
-		}
+		internal abstract bool IsValid(T data);
 	}
 }

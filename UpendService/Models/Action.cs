@@ -2,10 +2,15 @@
 
 namespace UpendService.Models
 {
-	public class Action : Data
+	public class Action : Data<Action>
 	{
 		public Guid TaskGuid { get; set; }
 		public DateTimeOffset Time { get; set; }
+
+		public override DataEntity<Action> Entity(string partition)
+		{
+			return new ActionDataEntity(this, partition, Time.Ticks.ToString());
+		}
 	}
 
 	public class ActionDataEntity : DataEntity<Action>
