@@ -12,11 +12,9 @@ namespace UpendService.Services
 	{
 		private readonly CloudTable _table;
 
-		public AzureStorageTable(Type type, string connection)
+		public AzureStorageTable(CloudTable table)
 		{
-			CloudStorageAccount account = CloudStorageAccount.Parse(connection);
-			_table = account.CreateCloudTableClient().GetTableReference(type.Name + "s");
-			_table.CreateIfNotExistsAsync().Wait();
+			_table = table;
 		}
 
 		#region Table Storage Specific Methods

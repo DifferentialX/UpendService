@@ -1,27 +1,27 @@
-﻿using Microsoft.Extensions.Configuration;
-using UpendService.Models;
+﻿using System;
 using System.Collections.Generic;
+using UpendService.Models;
 using UpendService.Services;
+using UpendService.Services.TableFactory;
+using Action = UpendService.Models.Action;
 
 namespace UpendService
 {
 	public class ModelContext
 	{
-		public IDictionary<System.Type, ITable> tables;
+		public IDictionary<Type, ITable> tables;
 
 		public ITable Actions => tables[typeof(Action)];
 		public ITable Tasks => tables[typeof(Task)];
 		public ITable Users => tables[typeof(User)];
 
-
-		public ModelContext(IConfigurationRoot configuration)
+		public ModelContext(ITableFactory factory)
 		{
-			var connection = configuration.GetConnectionString("UpendStorageConnection");
+			tables = new Dictionary<Type, ITable>();
 
-			tables = new Dictionary<System.Type, ITable>();
-			StoreITable<Action>(connection);
-			StoreITable<Task>(connection);
-			StoreITable<User>(connection);
+			InitializeTable<Action>(factory);
+			InitializeTable<Task>(factory);
+			InitializeTable<User>(factory);
 		}
 
 		internal ITable GetTable<T>()
@@ -31,9 +31,9 @@ namespace UpendService
 			return tables[typeof(T)];
 		}
 
-		private void StoreITable<T> (string connection) where T : Data<T>
+		private void InitializeTable<T> (ITableFactory factory) where T : Data<T>
 		{
-			var table = new AzureStorageTable(typeof(T), connection);
+			var table = factory.CreateTable<T>();
 			tables.Add(typeof(T), table);
 		}
 	}
