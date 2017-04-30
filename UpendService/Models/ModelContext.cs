@@ -24,6 +24,13 @@ namespace UpendService
 			StoreITable<User>(connection);
 		}
 
+		internal ITable GetTable<T>()
+		{
+			if (!tables.ContainsKey(typeof(T)))
+				return null;
+			return tables[typeof(T)];
+		}
+
 		private void StoreITable<T> (string connection) where T : Data<T>
 		{
 			var table = new AzureStorageTable(typeof(T), connection);
