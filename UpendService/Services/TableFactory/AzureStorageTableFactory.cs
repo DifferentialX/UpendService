@@ -13,7 +13,7 @@ namespace UpendService.Services.TableFactory
 	{
 		private readonly CloudStorageAccount _account;
 
-		public AzureStorageTableFactory(IConfiguration config)
+		public AzureStorageTableFactory(IConfigurationRoot config)
 		{
 			var connection = config.GetConnectionString("UpendStorageConnection");
 			_account = CloudStorageAccount.Parse(connection);
