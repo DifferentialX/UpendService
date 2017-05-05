@@ -1,19 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using UpendService;
 using UpendService.Models;
-using Entity = UpendService.Models.DataEntity<UpendService.Models.Task>;
-using Action = UpendService.Models.Action;
-using Microsoft.Extensions.Configuration;
+using UpendService.Services;
 
 namespace UpendService.Controllers
 {
 	public class TaskController : BaseController<Task>
 	{
-		public TaskController(ModelContext model) : base(model) { }
+		public TaskController(ModelContext model, ICurrentIdentity identity) : base(model, identity) { }
 
 		public override Guid? Post([FromBody]Task value)
 		{

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -15,11 +14,14 @@ namespace UpendService.Controllers
 	{
 		protected readonly ModelContext _model;
 		protected readonly ITable _table;
-		public BaseController(ModelContext model)
+		protected readonly ICurrentIdentity _identity;
+
+		public BaseController(ModelContext model, ICurrentIdentity identity)
 		{
 			
 			_model = model;
 			_table = model.GetTable<T>();
+			_identity = identity;
 		}
 		#region Actions
 
@@ -52,17 +54,7 @@ namespace UpendService.Controllers
 			_table.Delete<T>(Where.Query(Partition, id.ToString()));
 		#endregion
 
-		protected string Partition
-		{
-			get
-			{
-				var claimsIdentity = User; //Asp.Net Core User, not a Model.User
-
-				string provider = claimsIdentity.FindFirst("http://schemas.microsoft.com/identity/claims/identityprovider").Value;
-				string nameIdentifier = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-				return nameIdentifier + "_" + provider;
-			}
-		}
+		protected string Partition => _identity.UniqueId;
 		
 		[NonAction]
 		public virtual Guid? CreateResponse(T data) { return null; }

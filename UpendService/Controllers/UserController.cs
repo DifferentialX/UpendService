@@ -5,12 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UpendService.Models;
+using UpendService.Services;
 
 namespace UpendService.Controllers
 {
 	public class UserController : BaseController<User>
 	{
-		public UserController(ModelContext model) : base(model) { }
+		public UserController(ModelContext model, ICurrentIdentity identity) : base(model, identity) { }
 
 		internal override bool IsValid(User data)
 		{
