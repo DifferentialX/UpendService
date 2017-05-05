@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UpendService.Models;
+using UpendService.Services;
 
-
-namespace UpendService.Services.Tables
+namespace UpendServiceTest
 {
 	public class FakeTable<U> : ITable where U : Data<U>
 	{
-		List<FakeDataRow<U>> data = new List<FakeDataRow<U>>();
+		public IList<FakeDataRow<U>> Data { get; set; } = new List<FakeDataRow<U>>();
 
 		public void Delete<T>(Where where) where T : Data<T>
 		{
@@ -23,7 +23,12 @@ namespace UpendService.Services.Tables
 
 		public void Insert<T>(T data, string partitionKey) where T : Data<T>
 		{
-			throw new NotImplementedException();
+			Data.Add(new FakeDataRow<U>
+			{
+				PartitionKey = partitionKey,
+				RowKey = data.Entity(partitionKey).RowKey,
+				Data = data as U
+			});
 		}
 
 		public void Update<T>(T data, string partitionKey) where T : Data<T>

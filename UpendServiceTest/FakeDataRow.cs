@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UpendService.Models;
 
-namespace UpendService.Services.Tables
+namespace UpendServiceTest
 {
 	public class FakeDataRow<T> where T : Data<T>
 	{
