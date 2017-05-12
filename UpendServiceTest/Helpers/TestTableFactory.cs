@@ -7,9 +7,9 @@ namespace UpendServiceTest
 {
 	public class TestTableFactory : ITableFactory
 	{
-		public ITable Tasks { get; set; }
-		public ITable Actions { get; set; }
-		public ITable Users { get; set; }
+		public ITable Tasks { get; set; } = new FakeTable<Task>();
+		public ITable Actions { get; set; } = new FakeTable<Action>();
+		public ITable Users { get; set; } = new FakeTable<User>();
 
 		public ITable CreateTable<T>() where T : Data<T>
 		{
