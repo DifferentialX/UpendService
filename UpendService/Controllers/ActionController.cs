@@ -1,9 +1,6 @@
 ﻿using System;
-using Microsoft.WindowsAzure.Storage.Table;
-using UpendService.Models;
-using Action = UpendService.Models.Action;
-using Microsoft.Extensions.Configuration;
 using UpendService.Services;
+using Action = UpendService.Models.Action;
 
 namespace UpendService.Controllers
 {
@@ -11,7 +8,7 @@ namespace UpendService.Controllers
 	{
 		public ActionController(ModelContext model, ICurrentIdentity identity) : base(model, identity) { }
 
-		internal override bool IsValid(Action data)
+		public override bool IsValid(Action data)
 		{
 			if (data.TaskGuid == Guid.Empty || data.Time < new DateTimeOffset(2012, 05, 01, 00, 00, 00, new TimeSpan(0)))
 				return false;

@@ -35,7 +35,7 @@ namespace UpendService.Controllers
 			return data.TaskGuid;
 		}
 
-		internal override bool IsValid(Task data)
+		public override bool IsValid(Task data)
 		{
 			if (data.Color < 0 || data.Color > 5 || string.IsNullOrEmpty(data.Name) || data.Size < 0 || data.Size > 2 || data.TaskGuid == Guid.Empty)
 				return false;

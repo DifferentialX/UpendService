@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using UpendService.Models;
 using UpendService.Services;
 
@@ -60,6 +59,6 @@ namespace UpendService.Controllers
 		public virtual Guid? CreateResponse(T data) { return null; }
 
 		[NonAction]
-		internal abstract bool IsValid(T data);
+		public abstract bool IsValid(T data);
 	}
 }
